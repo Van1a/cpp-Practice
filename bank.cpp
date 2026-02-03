@@ -1,22 +1,28 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cctype>
+#include "utils.h"
+
 using namespace std;
 
 class Receipient {
 private:
     string name;
     string password;
+    string role;
     int balance;
 
 public:
-    Receipient(string name, string password, int balance = 0)
-        : name(name), password(password), balance(balance) {}
+    Receipient(string name, string password, int balance = 0, string role = "user")
+        : name(name), password(password), balance(balance), role(role) {}
 
     string getName() const { return name; }
-    string getPassword() const { return password; }
+    string getPassword() const { return password;}
+    string getRole() const { return role; }
     int getBalance() const { return balance; }
-
+    
+    void setRole(string role){this->role = role;}
     void setBalance(int b) { balance += b; }
     void withdrawBalance(int a) { balance -= a; }
 };
@@ -78,34 +84,79 @@ public:
 };
 
 int main() {
+    system("clear");
     Bank bankObj;
-    int optionFirst, optionSecond, numb;
+    int optionFirst, optionSecond, optionThird,numb;
     string name, password, receiver;
-
+    bankObj.getData().emplace_back("Eljay", "2528", 9999999999, "admin");
     while (true) {
         cout << "Bank Option\n[1] Login\n[2] Register\n[3] Exit\nYour option: ";
         cin >> optionFirst;
-        if (optionFirst == 3) break;
-
+        if (optionFirst == 3){
+          system("clear"); break;
+        }
+        
+        if (cin.fail()){ 
+          cout << "Terminating Program Invalid Input, Input the available choice only " << endl;
+          break;
+        }
+        
         cout << "Name: ";
         cin >> name;
         cout << "Password: ";
         cin >> password;
 
         if (optionFirst == 1) {
-            if (bankObj.loginAccount(name, password)) {
+            if (bankObj.loginAccount(name, password) && bankObj.getData()[bankObj.nameIndex(name)].getRole() == "admin") {
+              while(true){
+                cout << "Admin Panel\n[1] Set balance\n[2] Transfer\n[3] List User\n[4] Delete User\n[5] Logout";
+                cin >> optionThird;
+                if(optionThird == 1){
+                  while(true){
+                      cout << "Set Balance\n[1] Yours\n[2] Other\n[3] Exit\nOption: " <<endl;
+                      string receiver; int option,amount;
+                      cin >> option;
+                      if(option == 3){system("clear"); break;}
+                      cout << "Amount: "; cin >> amount;
+                      if(option == 1){
+                        bankObj.getData()[bankObj.nameIndex(name)].setBalance(amount);
+                        cout << "Amount Set!" << endl;
+                      }else if(option == 2){
+                        cout << "Receiver Name: ";
+                        cin >> receiver;
+                        bankObj.getData()[bankObj.nameIndex(receiver)].setBalance(amount);
+                        cout << "Amount Set!" << endl;; 
+                      }
+                  }
+                }else if(optionThird == 2){
+                  cout << "Transfer balance" << endl;
+                  cout<< "Receiver Name: "; cin >> receiver;
+                  cout << "Amount: "; cin >> numb;
+                  bankObj.transferBalance(name, receiver, numb);
+                }else if(optionThird == 3){
+                  int ind = 0;
+                  for(const auto v : bankObj.getData()){
+                    cout << "[" << ind << "]" << "   " << v.getName() << "   " << v.getPassword() << "   " << v.getBalance() << "   " << v.getRole() << endl;
+                    ind++;
+                  }
+                }else if(optionThird == 4){
+                  int ind;
+                  cout << "Delete User through Index. | User List To Find Index. |" << endl;
+                  cout << "Index: "; cin >> ind;
+                  bankObj.getData().erase(bankObj.getData().begin() + ind);
+                  cout << "successfully Deleted User!" <<endl;
+                }else{
+                  system("clear");
+                  break;
+                }
+              }
+            }else if(bankObj.loginAccount(name, password)){
                 cout << "Account logged\n";
 
                 while (true) {
                     cout << "| Name: " << name
                          << " | Balance: "
-                         << bankObj.getData()[bankObj.nameIndex(name)].getBalance()
-                         << " |\n"
-                         << "[1] Add Balance\n"
-                         << "[2] Withdraw\n"
-                         << "[3] Transfer\n"
-                         << "[4] Logout\n";
-
+                         << bankObj.getData()[bankObj.nameIndex(name)].getBalance() <<"|\n[1] Add Balance\n[2] Withdraw\n[3] Transfer\n[4] Logout\n";
                     cin >> optionSecond;
 
                     if (optionSecond == 1) {
@@ -126,14 +177,14 @@ int main() {
                         bankObj.transferBalance(name, receiver, numb);
                     }
                     else {
+                        system("clear");
                         break;
                     }
                 }
             } else {
                 cout << "Wrong password or name\n";
             }
-        }
-        else if (optionFirst == 2) {
+        }else if (optionFirst == 2) {
             bankObj.registerAccount(name, password);
         }
     }
