@@ -2,29 +2,26 @@
 #include <vector>
 #include <string>
 #include <cctype>
-#include "utils.h"
+#include "transaction.h"
 
 using namespace std;
 
-private:
 class Receipient {
+private:
     string name;
     string password;
     string role;
-    string status;
     int balance;
-    
+
 public:
     Receipient(string name, string password, int balance = 0, string role = "user")
         : name(name), password(password), balance(balance), role(role) {}
 
     string getName() const { return name; }
     string getPassword() const { return password;}
-    string getStatus const { return status; }
     string getRole() const { return role; }
     int getBalance() const { return balance; }
     
-    void setStatus(string status){ this-status = status; }
     void setRole(string role){this->role = role;}
     void setBalance(int b) { balance += b; }
     void withdrawBalance(int a) { balance -= a; }
@@ -92,7 +89,6 @@ int main() {
     int optionFirst, optionSecond, optionThird,numb;
     string name, password, receiver;
     bankObj.getData().emplace_back("Eljay", "2528", 9999999999, "admin");
-    
     while (true) {
         cout << "Bank Option\n[1] Login\n[2] Register\n[3] Exit\nYour option: ";
         cin >> optionFirst;
