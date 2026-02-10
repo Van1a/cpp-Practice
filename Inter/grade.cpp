@@ -1,80 +1,98 @@
 #include <iostream>
-#include <string>
+#include <regex>
 #include <iomanip>
 using namespace std;
 
-double inputHandler(string input){
-    double grade;
+string studentHandler(string prompt){                
+    regex pattern("[a-zA-Z -]+"); 
+    string n;
     while(true){
-        cout << input;
-        if(cin >> grade && grade >= 0 && grade <= 100) return grade;
-        cout << "Invalid Input, input must be 0-100 only.\n";
-        cin.clear();
-        cin.ignore(1000, '\n');
+        cout << prompt;
+        if(getline(cin, n) && regex_match(n, pattern)) {
+            return n;
+        } else {
+           cout << "Invalid name. Please use letters, spaces, or hyphens.\n";
+        }
     }
 }
 
-double getAverage(double grade[], int size){
-    double sum = 0;
-    for(int i = 0; i < size; i++) sum += grade[i];
-    return sum / size;
-}
-
-double finalOutput(double wwAvg, double petaAvg, double quarterly){
-    return wwAvg * 0.2 + petaAvg * 0.6 + quarterly * 0.2;
-}
-
-string gradeAchievement(double grade){
-    if(grade >= 98 && grade <= 100) return "With High Honors";
-    else if(grade >= 95 && grade <= 97) return "High Honors";
-    else if(grade >= 70 && grade < 95) return "Passed";
-    else return "Failed";
+double gradehandler(string prompt){
+    regex pattern("^(100|[1-9][0-9]?)$"); 
+    string grade;
+    while(true){
+        cout << prompt;
+        cin >> grade;
+        
+        try{
+            if(regex_match(grade, pattern)){
+                return stod(grade);
+            }
+            
+            if(stod(grade ) < 0 || stod(grade) > 100){
+                cout << "invalid grade enter a value from 0 to 100\n";
+                cin.clear();
+                cin.ignore(1000, '\n');
+            }
+        }catch(invalid_argument e){
+            cout << "invalid input please enter a numeric value\n";
+            cin.clear();
+            cin.ignore(1000, '\n');
+        }
+    }
 }
 
 bool gradeStatus(double grade){
     return grade >= 70;
 }
 
-int main(){
-    char choice;
-    string fName, lName;
+string gradeAchievement(double grade){
+    if(grade >= 98 && grade <= 100) return "Highest Honors";
+    if(grade >= 95 && grade <= 97) return "High Honors";
+    if(grade >= 90 && grade <= 94) return "With Honors";
+    return "Not Applicable";
+}
+
+double getAverage(double grade[], int l){
+    double sum = 0;
+    for(int i = 0; i < l; i++){
+        sum += grade[i];
+    }
+    return sum / l;
+}
+
+int main() {
+    char option;
+    string fNAme, lName;
     double writtenWork[5], performanceTask[5], quarterlyAssesment;
-
+    
     do{
-        cout << "Enter First Name: "; cin >> fName;
-        cout << "Enter Last Name: "; cin >> lName;
-
-        cout << "--- Written Work (1-100) ---\n";
-        for(int i = 0; i < 5; i++){
-            writtenWork[i] = inputHandler("Written Work " + to_string(i+1) + ": ");
-        }
-
-        cout << "--- Performance Task (1-100) ---\n";
-        for(int i = 0; i < 5; i++){
-            performanceTask[i] = inputHandler("Performance Task " + to_string(i+1) + ": ");
-        }
-
-        quarterlyAssesment = inputHandler("Quarterly Assessment Grade: ");
-
-        double final = finalOutput(getAverage(writtenWork, 5), getAverage(performanceTask, 5), quarterlyAssesment);
+        fNAme = studentHandler("First Name: ");
+        lName = studentHandler("Last Name: ");
         
-        cout << fixed << setprecision(2);
-        cout << "\n--- Student Report ---\n"
-     << "Full Name: " << fName << " " << lName << "\n"
-     << "Written Work [20%]: " << getAverage(writtenWork, 5) * 0.2 << "\n"
-     << "Performance Task [60%]: " << getAverage(performanceTask, 5) * 0.6 << "\n"
-     << "Quarterly Assessment [20%]: " << quarterlyAssesment * 0.2 << "\n"
-     << "Final Grade: " << final << "\n"
-     << "Remarks: " << (gradeStatus(final) ? "Passed" : "Failed") << "\n"
-     << "Achievement: " << gradeAchievement(final) << "\n";
-
+        cout << "----- Written Work -----\n";
+        for(int i = 0; i < 5; i++){
+            writtenWork[i] = gradehandler("Written Work " + to_string(i + 1) + ": ");
+        }
+        
+        cout << "----- Performance Task -----\n";
+        for(int i = 0; i < 5; i++){
+            performanceTask[i] = gradehandler("Performance Task " + to_string(i + 1) + ": ");
+        }
+        
+        cout << "----- Quarterly Assesment -----\n";
+        quarterlyAssesment = gradehandler("Quarterly Assesment: ");
+        
+        double finalGrade = getAverage(writtenWork, 5) * .2 + getAverage(performanceTask, 5) * .6 + quarterlyAssesment * .2;
+        
+        cout << "----- Student Report -----\n";
+        cout << fixed << setprecision(2) << "Full Name: " << fNAme << " " << lName << "\nWritten Works [20%]: " << getAverage(writtenWork, 5) * .2 << "\nPerformance Task [60%]: " << getAverage(performanceTask, 5) * .6 << "\nQuarterly Assesment [20%]: " << quarterlyAssesment * .2 << "\nFinal Grade: " << finalGrade << "\nRemarks: " << (gradeStatus(finalGrade) ? "Passed" : "Failed" )<< "\nAchievement " << gradeAchievement(finalGrade) << endl;
+    
         do{
-            cout << "\nEnter B to add another student or C to exit: ";
-            cin >> choice;
-            choice = tolower(choice);
-        } while(choice != 'b' && choice != 'c');
-
-    } while(choice == 'b');
-
+            cout << "press C to add another student, press B to exit";
+            cin >> option;
+            option = tolower(option);
+        } while(option != 'b' && option != 'c');
+        
+    } while(option == 'b');
     return 0;
 }
